@@ -1,10 +1,12 @@
 import { Component, JSX } from 'solid-js';
 import { A } from '@solidjs/router';
-import { FileText, Home, LogOut, Settings, User, Users } from 'lucide-solid';
+import { FileText, Home, LogOut, Menu, Settings, User, Users } from 'lucide-solid';
 
 interface LayoutProps {
   children: JSX.Element;
   showSidebar?: boolean;
+  sidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
 }
 
 const Layout: Component<LayoutProps> = (props) => {
@@ -18,10 +20,24 @@ const Layout: Component<LayoutProps> = (props) => {
   return (
     <div class="min-h-screen bg-gray-50">
       {props.showSidebar ? (
-        <div class="flex">
+        <div class="flex relative">
+          {/* Mobile Sidebar Overlay */}
+          {props.sidebarOpen && (
+            <div 
+              class="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
+              onClick={props.onToggleSidebar}
+            />
+          )}
+          
           {/* Sidebar */}
-          <div class="hidden md:flex md:w-64 md:flex-col">
-            <div class="flex flex-col flex-grow pt-5 bg-white overflow-y-auto border-r border-gray-200">
+          <div class={`
+            ${props.sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+            md:translate-x-0 md:flex md:w-64 md:flex-col
+            fixed inset-y-0 left-0 z-50 w-64 flex flex-col
+            md:relative md:inset-y-auto md:z-auto
+            transition-transform duration-300 ease-in-out
+          `}>
+            <div class="flex flex-col flex-grow pt-5 bg-white overflow-y-auto border-r border-gray-200 shadow-lg">
               <div class="flex items-center flex-shrink-0 px-4">
                 <A href="/" class="flex items-center">
                   <FileText class="h-8 w-8 text-indigo-600" />
@@ -64,7 +80,38 @@ const Layout: Component<LayoutProps> = (props) => {
           </div>
 
           {/* Main content */}
-          <div class="flex-1 flex flex-col">
+          <div class="flex-1 flex flex-col md:ml-0">
+            {/* Header */}
+            <header class="bg-white shadow-sm border-b border-gray-200 px-4 py-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <button
+                    onClick={props.onToggleSidebar}
+                    class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                  >
+                    <Menu class="h-6 w-6" />
+                  </button>
+                  <h1 class="ml-3 text-lg font-semibold text-gray-900">Dashboard</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div class="flex items-center">
+                    <span class="text-sm text-gray-500 mr-2">Sidebar</span>
+                    <button
+                      onClick={props.onToggleSidebar}
+                      class={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                        props.sidebarOpen ? 'bg-indigo-600' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        class={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          props.sidebarOpen ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </header>
             <main class="flex-1">
               {props.children}
             </main>

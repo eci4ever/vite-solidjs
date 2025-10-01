@@ -4,6 +4,7 @@ import {
   Calendar, 
   DollarSign, 
   FileText, 
+  Menu,
   Plus, 
   TrendingUp, 
   Users 
@@ -11,6 +12,8 @@ import {
 import Layout from './Layout';
 
 const DashboardPage: Component = () => {
+  const [open, setOpen] = createSignal(false);
+  
   const [stats] = createSignal([
     {
       name: 'Total Revenue',
@@ -87,12 +90,11 @@ const DashboardPage: Component = () => {
   };
 
   return (
-    <Layout showSidebar={true}>
+    <Layout showSidebar={true} sidebarOpen={open()} onToggleSidebar={() => setOpen(!open())}>
       <div class="p-6">
-        {/* Header */}
+        {/* Welcome Section */}
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p class="text-gray-600 mt-2">Welcome back! Here's what's happening with your invoices.</p>
+          <p class="text-gray-600">Welcome back! Here's what's happening with your invoices.</p>
         </div>
 
         {/* Stats Grid */}
