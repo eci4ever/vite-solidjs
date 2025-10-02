@@ -23,7 +23,7 @@ const SignInPage: Component = () => {
       { email: email(), password: password() },
       {
         onSuccess: () => {
-          navigate("/"); // dalam SolidJS: navigate("/path")
+          navigate("/dashboard"); // dalam SolidJS: navigate("/path")
         },
         onError: (error) => {
           console.error(error);

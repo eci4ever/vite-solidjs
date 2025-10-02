@@ -1,6 +1,16 @@
-import { Component, JSX } from 'solid-js';
-import { A } from '@solidjs/router';
-import { FileText, Home, LogOut, Menu, Settings, User, Users } from 'lucide-solid';
+import { Component, JSX, Show } from "solid-js";
+import { A } from "@solidjs/router";
+import {
+  FileText,
+  Home,
+  LogOut,
+  Menu,
+  Settings,
+  User,
+  Users,
+} from "lucide-solid";
+import { signOut, useSession } from "./lib/auth-client";
+import { useNavigate } from "@solidjs/router";
 
 interface LayoutProps {
   children: JSX.Element;
@@ -10,12 +20,14 @@ interface LayoutProps {
 }
 
 const Layout: Component<LayoutProps> = (props) => {
+  const navigate = useNavigate();
+  const session = useSession();
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Invoices', href: '/invoices', icon: FileText },
-    { name: 'Customers', href: '/customers', icon: Users },
-    { name: 'Settings', href: '/settings', icon: Settings },
-    { name: 'Todo', href: '/todo', icon: FileText },
+    { name: "Dashboard", href: "/dashboard", icon: Home },
+    { name: "Invoices", href: "/invoices", icon: FileText },
+    { name: "Customers", href: "/customers", icon: Users },
+    { name: "Settings", href: "/settings", icon: Settings },
+    { name: "Todo", href: "/todo", icon: FileText },
   ];
 
   return (
@@ -24,29 +36,33 @@ const Layout: Component<LayoutProps> = (props) => {
         <div class="flex min-h-screen">
           {/* Mobile Sidebar Overlay */}
           {props.sidebarOpen && (
-            <div 
+            <div
               class="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
               onClick={props.onToggleSidebar}
             />
           )}
-          
+
           {/* Sidebar */}
-          <div class={`
-            ${props.sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+          <div
+            class={`
+            ${props.sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
             md:translate-x-0 md:flex md:w-64 md:flex-col
             fixed inset-y-0 left-0 z-50 w-64
             md:relative md:sticky md:top-0 md:h-screen
             transition-transform duration-300 ease-in-out
-          `}>
+          `}
+          >
             <div class="flex flex-col h-full bg-white border-r border-gray-200 shadow-lg">
               {/* Header Logo */}
               <div class="flex items-center flex-shrink-0 px-4 py-5 border-b border-gray-200">
                 <A href="/" class="flex items-center">
                   <FileText class="h-8 w-8 text-indigo-600" />
-                  <span class="ml-2 text-xl font-bold text-gray-900">InvoiceApp</span>
+                  <span class="ml-2 text-xl font-bold text-gray-900">
+                    InvoiceApp
+                  </span>
                 </A>
               </div>
-              
+
               {/* Navigation - flex-1 untuk ambil ruang tengah */}
               <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
                 {navigation.map((item) => {
@@ -63,23 +79,56 @@ const Layout: Component<LayoutProps> = (props) => {
                   );
                 })}
               </nav>
-              
+
               {/* User Profile - stick di bawah */}
               <div class="flex-shrink-0 border-t border-gray-200 p-4">
-                <div class="flex items-center">
-                  <div class="flex-shrink-0">
-                    <div class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
-                      <User class="h-5 w-5 text-white" />
+                <Show
+                  when={session().data?.user}
+                  fallback={
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0">
+                        <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+                          <User class="h-5 w-5 text-gray-500" />
+                        </div>
+                      </div>
+                      <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-500">
+                          Loading...
+                        </p>
+                      </div>
+                    </div>
+                  }
+                >
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                      <div class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
+                        <User class="h-5 w-5 text-white" />
+                      </div>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm font-medium text-gray-700">
+                        {session().data?.user?.name ||
+                          session().data?.user?.email ||
+                          "User"}
+                      </p>
+                      <button
+                        class="text-xs text-gray-500 hover:text-gray-700 flex items-center"
+                        onClick={() =>
+                          signOut({
+                            fetchOptions: {
+                              onSuccess: () => {
+                                navigate("/");
+                              },
+                            },
+                          })
+                        }
+                      >
+                        <LogOut class="h-3 w-3 mr-1" />
+                        Sign out
+                      </button>
                     </div>
                   </div>
-                  <div class="ml-3">
-                    <p class="text-sm font-medium text-gray-700">John Doe</p>
-                    <button class="text-xs text-gray-500 hover:text-gray-700 flex items-center">
-                      <LogOut class="h-3 w-3 mr-1" />
-                      Sign out
-                    </button>
-                  </div>
-                </div>
+                </Show>
               </div>
             </div>
           </div>
@@ -96,7 +145,9 @@ const Layout: Component<LayoutProps> = (props) => {
                   >
                     <Menu class="h-6 w-6" />
                   </button>
-                  <h1 class="ml-3 text-lg font-semibold text-gray-900">Dashboard</h1>
+                  <h1 class="ml-3 text-lg font-semibold text-gray-900">
+                    Dashboard
+                  </h1>
                 </div>
                 <div class="flex items-center space-x-4">
                   <div class="hidden md:flex items-center">
@@ -104,12 +155,12 @@ const Layout: Component<LayoutProps> = (props) => {
                     <button
                       onClick={props.onToggleSidebar}
                       class={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-                        props.sidebarOpen ? 'bg-indigo-600' : 'bg-gray-200'
+                        props.sidebarOpen ? "bg-indigo-600" : "bg-gray-200"
                       }`}
                     >
                       <span
                         class={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          props.sidebarOpen ? 'translate-x-6' : 'translate-x-1'
+                          props.sidebarOpen ? "translate-x-6" : "translate-x-1"
                         }`}
                       />
                     </button>
@@ -117,18 +168,14 @@ const Layout: Component<LayoutProps> = (props) => {
                 </div>
               </div>
             </header>
-            
+
             {/* Main Content Area */}
-            <main class="flex-1 overflow-y-auto">
-              {props.children}
-            </main>
+            <main class="flex-1 overflow-y-auto">{props.children}</main>
           </div>
         </div>
       ) : (
         // Full page layout without sidebar
-        <div class="min-h-screen">
-          {props.children}
-        </div>
+        <div class="min-h-screen">{props.children}</div>
       )}
     </div>
   );
